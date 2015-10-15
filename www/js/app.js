@@ -1,19 +1,21 @@
-// ionic-http-auth was made from the ionic-starter-app sideMenu
+// starter was made from the ionic-starter-app sideMenu
 // to create a new app, at a command prompt type this: ionic start appname sideMenu
 
 // angular.module is a global place for creating, registering and retrieving Angular modules
-// 'ionic-http-auth' is the name of this angular module example (also set in a <body> attribute in index.html)
+// 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
-// 'ionic-http-auth.controllers' is found in controllers.js
-// 'ionic-http-auth.services is' found in services.js
-angular.module('ionic-http-auth', [
-  'ionic',
-  'ngMockE2E',
-  'LocalStorageModule',
-  'ionic-http-auth.services',
-  'ionic-http-auth.controllers'])
+// 'starter.controllers' is found in controllers.js
+// 'starter.services is' found in services.js
 
-  .run(function($rootScope, $ionicPlatform, $httpBackend, localStorageService) {
+var starter = {
+  controllers: angular.module('starter.controllers', []),
+  services: angular.module('starter.services', [])
+};
+
+
+starter = angular.module('starter', ['ionic', 'ngMockE2E', 'LocalStorageModule', 'starter.controllers', 'starter.services'])
+
+.run(function($rootScope, $ionicPlatform, $httpBackend, localStorageService) {
 
 	$ionicPlatform.ready(function() {
     if(window.StatusBar) {
@@ -21,34 +23,37 @@ angular.module('ionic-http-auth', [
       StatusBar.styleDefault();
     }
   });
-  
+
   // Mocking code used for simulation purposes (using ngMockE2E module)
   var customers = [{name: 'John Smith'}, {name: 'Tim Johnson'}];
-  
+
   // returns the current list of customers or a 401 depending on authorization flag
   $httpBackend.whenGET('https://customers').respond(function (method, url, data, headers) {
     var authToken = localStorageService.get('authorizationToken');
 	  return authToken ? [200, customers] : [401];
   });
 
-  $httpBackend.whenPOST('https://login').respond(function(method, url, data) {
-    var authorizationToken = 'NjMwNjM4OTQtMjE0Mi00ZWYzLWEzMDQtYWYyMjkyMzNiOGIy';
-    return  [200 , { authorizationToken: authorizationToken } ];
+  $httpBackend.expectPOST('http://localhost:8000/rest-auth/login/').respond(function(method, url, data) {
+    return  [200];
   });
 
-  $httpBackend.whenPOST('https://logout').respond(function(method, url, data) {
+  $httpBackend.expectPOST('http://localhost:8000/rest-auth/logout/').respond(function(method, url, data) {
     return [200];
   });
 
   // All other http requests will pass through
   $httpBackend.whenGET(/.*/).passThrough();
-  
+  $httpBackend.whenPOST(/.*/).passThrough();
+
 })
 
-.config(function($stateProvider, $urlRouterProvider) {
+.config(function($stateProvider, $urlRouterProvider, $httpProvider) {
+
+  $httpProvider.defaults.useXDomain = true;
+  delete $httpProvider.defaults.headers.common['X-Requested-With'];
 
   $stateProvider
-  
+
     .state('app', {
       url: "/app",
       abstract: true,
@@ -60,9 +65,9 @@ angular.module('ionic-http-auth', [
 	    views: {
 	      'menuContent' :{
 	          controller:  "HomeCtrl",
-	          templateUrl: "templates/home.html"            	
+	          templateUrl: "templates/home.html"
 	      }
-	  }      	  
+	  }
     })
     .state('app.customers', {
       url: "/customers",
@@ -70,9 +75,18 @@ angular.module('ionic-http-auth', [
 	    views: {
 	      'menuContent' :{
 	          controller:  "CustomerCtrl",
-	          templateUrl: "templates/customers.html"            	
+	          templateUrl: "templates/customers.html"
 	      }
-	  }      	  
+	  }
+    })
+    .state('app.register', {
+      url: "/register",
+      views: {
+         'menuContent' :{
+           controller: "RegisterCtrl",
+           templateUrl: "templates/register.html"
+         }
+      }
     })
     .state('app.logout', {
       url: "/logout",
@@ -81,7 +95,7 @@ angular.module('ionic-http-auth', [
     		   controller: "LogoutCtrl",
            templateUrl: "templates/home.html"
          }
-      } 
+      }
     });
   $urlRouterProvider.otherwise("/app/home");
 });

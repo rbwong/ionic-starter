@@ -16,7 +16,10 @@
         <ion-item nav-clear menu-close ui-sref="app.customers" ui-sref-opts="{reload: true}">
           Customers
         </ion-item>
-        <ion-item nav-clear menu-close ui-sref="app.logout" ui-sref-opts="{reload: true}">
+        <ion-item nav-clear menu-close ui-sref="app.register" ui-sref-opts="{reload: true}">
+          Register
+        </ion-item>
+        <ion-item nav-clear menu-close ui-sref="app.logout" ui-sref-opts="{reload: true}" ng-show="isLoggedin">
           Logout
         </ion-item>
       </ion-list>
